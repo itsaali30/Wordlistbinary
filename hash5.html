@@ -11,6 +11,14 @@
 <body>
     <div id="app">
         <h3>{{ count }}</h3>
+        {{info}}
+        <select v-model="selectedOption" @change="getData">
+            <option value="">Select URL</option>
+            <option value="https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h">Example URL 1</option>
+            <option value="https://itsaali30.github.io/Wordlistbinary/Test.json">Example URL 2</option>
+        </select>
+        <br>
+        <p v-if="selectedData">Selected Data:{{selectedData}}</p>
         <button @click="startUpdating" :disabled="updateInterval !== null">Start</button>
         <button @click="stopUpdating" :disabled="updateInterval === null">Stop</button>
 
@@ -28,6 +36,10 @@
                 {{ word.z }} {{ word.x }} {{ word.y }}
             </li>
         </ul>
+        <audio ref="audioPlayer" controls autoplay>
+            <source :src="audioSource" type="audio/mp3">
+           
+        </audio>
     </div>
 
     <style>
@@ -48,18 +60,35 @@
                 count: '1',
                 tempo: '',
                 mat: '',
-                tex: ['0', '9', '7', '0m'], // replace original info
+                tex: [['0'], ['9'], ['7'], ['0m']], // replace original info
                 res: 0,
-                info: [],
+                info: '',
+                selectedOption: '',
+                selectedData: [],
+                audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3',
             },
-            mounted() {
-                axios.get('https://api.airtable.com/v0/appUycLZwpqXOVZsQ/shopitem?api_key=keyFBurXbMDWyC81h')
-                    .then(response => (this.info = response.data.records))
-            },
+            
             methods: {
+                async getData() {
+                    if (this.selectedOption) {
+                        try {
+                            const response = await axios.get(this.selectedOption);
+                            this.selectedData = response.data;
+                        } catch (error) {
+                            console.error('Error fetching data:', error);
+                            this.selectedData = 'Error fetching data';
+                        }
+                    } else {
+                        this.selectedData = '';
+                    }
+                },
+                
+                
+                
                 texo: function () {
                     const i = this.res++;
-                    return this.tempo + this.tex[i];
+                    const array = this.selectedData;
+                    return this.tempo + array[i];
                 },
                 
                 generateHash: function (value) {
@@ -75,6 +104,9 @@
                         const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
                         this.matchedIndex = this.wordList.indexOf(matchedWord);
                         this.mat = matchedWord;
+                        
+                        this.$refs.audioPlayer.play();
+                        this.$refs.audioPlayer.currentTime += 66;
                         alert('Hash Matched!');
                     }
                     const newWords = [];
@@ -99,6 +131,8 @@
                         const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
                         this.matchedIndex = this.wordList.indexOf(matchedWord);
                         this.mat = matchedWord;
+                      this.$refs.audioPlayer.play();  
+                      this.$refs.audioPlayer.currentTime += 66;
                         alert('Hash Matched!');
                     }
                 },

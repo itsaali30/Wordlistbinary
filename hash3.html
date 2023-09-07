@@ -25,6 +25,10 @@
         {{ word.x }} {{ word.y }}
       </li>
     </ul>
+    <audio ref="audioPlayer" controls autoplay>
+            <source :src="audioSource" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
   </div>
 
   <style>
@@ -45,6 +49,7 @@
         count:'1',
         tempo:'',
         mat:'',
+        audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3',
       },
       methods: {
         generateRandomWord: function() {
@@ -72,6 +77,8 @@ this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash
             const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
             this.matchedIndex = this.wordList.indexOf(matchedWord);
             this.mat=matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
             alert('Hash Matched!');
           }
           const newWords = [];
@@ -95,6 +102,8 @@ this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash
             const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
             this.matchedIndex = this.wordList.indexOf(matchedWord);
             this.mat=matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
             alert('Hash Matched!');
           }
         },

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Word List</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+</head>
+<body>
+  <div id="app">
+  <H3>{{count}}</h3>
+    <button @click="startUpdating" :disabled="updateInterval !== null">Start</button>
+    <button @click="stopUpdating" :disabled="updateInterval === null">Stop</button>
+    
+    <input v-model="enteredHash" placeholder="Enter hash to match">
+   <input v-model="tempo" placeholder="Enter tempo">
+   
+    <button @click="checkHash">Check Hash</button>
+    <div v-if="hashMatched">
+      <h3>Hash Matched!</h3>
+      <p>binary:{{mat.x}}  | {{mat.y}}</p>
+      <h3> value:{{mat.z}}</h3>
+    </div>
+    <ul>
+      <li v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
+        {{ word.x }} {{ word.y }}
+      </li>
+    </ul>
+  </div>
+
+  <style>
+    .matched {
+      background-color: yellow;
+    }
+  </style>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        wordList: [],
+        enteredHash: '',
+        hashMatched: false,
+        matchedIndex: -1,
+        updateInterval: null,
+        count:'1',
+        tempo:'',
+        mat:'',
+      },
+      methods: {
+        generateRandomWord: function() {
+          const characters = '01';
+          let result = this.tempo;
+          for (let i = 0; i < 25; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomIndex);
+            
+            
+          }
+          
+          return result;
+        },
+        generateHash: function(value) {
+          return sha256(value);
+        },
+        updateWordList: function() {
+          if (this.hashMatched) {
+            clearInterval(this.updateInterval);
+            return;
+          }
+this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat=matchedWord;
+            alert('Hash Matched!');
+          }
+          const newWords = [];
+          for (let i = 0; i < 200; i++) {
+            const realValue = this.generateRandomWord();
+            const hashedValue = this.generateHash(realValue);
+            newWords.push({ x: realValue, y: hashedValue });
+          }
+
+          this.wordList = this.wordList.concat(newWords);
+          this.count= this.wordList.length;
+          
+
+          if (this.wordList.length >= 1000) {
+            this.wordList.splice(0, 500);
+          }
+         },
+        checkHash: function() {
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat=matchedWord;
+            alert('Hash Matched!');
+          }
+        },
+        startUpdating: function() {
+            
+          this.updateInterval = setInterval(this.updateWordList, 3/3000);
+          
+          
+        },
+        stopUpdating: function() {
+          clearInterval(this.updateInterval);
+          this.updateInterval = null;
+        },
+      },
+    });
+  </script>
+</body>
+</html>

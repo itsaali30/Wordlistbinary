@@ -8,7 +8,7 @@
 </head>
 <body>
   <div id="app">
-    <h3>{{ count }}</h3>
+    <h3>{{ count }}K</h3>
     <button @click="startUpdating" :disabled="updateInterval !== null">Start</button>
     <button @click="stopUpdating" :disabled="updateInterval === null">Stop</button>
 
@@ -54,7 +54,7 @@
         hashMatched: false,
         matchedIndex: -1,
         updateInterval: null,
-        count: 1,
+        count: 0,
         audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3',
         digi: 40, // Default value for digit length
       },
@@ -114,7 +114,7 @@
           }
 
           this.wordList = this.wordList.concat(newWords);
-          this.count = this.wordList.length;
+          this.count += 1;
 
         },
         checkHash: function() {

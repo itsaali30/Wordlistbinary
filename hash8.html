@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Word List</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app" class="container mt-5">
+    <h3>{{ formattedCount }}</h3>
+    <div class="mb-3">
+      <button @click="startUpdating" :disabled="updateInterval !== null" class="btn btn-primary me-2">Start</button>
+      <button @click="stopUpdating" :disabled="updateInterval === null" class="btn btn-secondary">Stop</button>
+    </div>
+
+    <div class="mb-3">
+      <input v-model="enteredHash" class="form-control mb-2" placeholder="Enter hash to match">
+      <button @click="checkHash" class="btn btn-success">Check Hash</button>
+    </div>
+
+    <div v-if="hashMatched" class="alert alert-success mt-3">
+      <h4>Hash Matched!</h4>
+      <p>binary: {{ mat.x }} | {{ mat.y }}</p>
+      <h4>value: {{ mat.z }}</h4>
+    </div>
+
+    <div class="mb-3">
+      <label for="digitLength" class="form-label">Select Digit Length:</label>
+      <select v-model="digi" id="digitLength" class="form-select">
+        <option v-for="n in 55" :key="n" :value="n">{{ n }}</option>
+      </select>
+    </div>
+<audio ref="audioPlayer" controls autoplay class="mt-3">
+      <source :src="audioSource" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+    
+    <table class="table table-info table-striped table-border">
+      <thead class="table-sucess">
+        <tr>
+          <th>X</th>
+          <th>Y</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
+          <td>{{ word.x }}</td>
+          <td>{{ word.y }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    
+  </div>
+
+  <style>
+    .matched {
+      background-color: #ffeb3b !important; /* Highlight matched row */
+    }
+    
+     
+  </style>
+  
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        wordList: [],
+        enteredHash: 'a2c0065a33ef1e9b068c56bfae44359282b6055a08c340e0f02d548b09fab65d',
+        url2: 'https://api.airtable.com/v0/appUycLZwpqXOVZsQ/Youtube',
+        hashMatched: false,
+        matchedIndex: -1,
+        updateInterval: null,
+        count: 0,
+        K: "K",
+        audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3',
+        digi: 40, // Default value for digit length
+      },
+      computed: {
+        formattedCount() {
+          return this.formatNumber(this.count);
+        }
+      },
+      methods: {
+        generateRandomWord: function() {
+          const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let result = '';
+          for (let i = 0; i < this.digi; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomIndex);
+          }
+          return result;
+        },
+        generateHash: function(value) {
+          return sha256(value);
+        },
+        updateWordList: function() {
+          if (this.hashMatched) {
+            clearInterval(this.updateInterval);
+            return;
+          }
+          if (this.wordList.length >= 2000) {
+            this.wordList.splice(0, 1999);
+          }
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
+
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat = matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
+            const data3 = {
+              records: [
+                {
+                  fields: {
+                    img: this.mat,
+                    name: matchedWord,
+                  },
+                },
+              ],
+            };
+            const config = {
+              headers: {
+                Authorization: 'Bearer keyFBurXbMDWyC81h',
+              },
+            };
+            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
+          }
+
+          const newWords = [];
+          for (let i = 0; i < 1000; i++) {
+            const realValue = this.generateRandomWord();
+            const hashedValue = this.generateHash(realValue);
+            newWords.push({ x: realValue, y: hashedValue });
+          }
+
+          this.wordList = this.wordList.concat(newWords);
+          this.count += 1;
+        },
+        checkHash: function() {
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat = matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
+            const data3 = {
+              records: [
+                {
+                  fields: {
+                    img: this.mat,
+                    name: matchedWord,
+                  },
+                },
+              ],
+            };
+            const config = {
+              headers: {
+                Authorization: 'Bearer keyFBurXbMDWyC81h',
+              },
+            };
+            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
+          }
+        },
+        startUpdating: function() {
+          this.updateInterval = setInterval(this.updateWordList, 500);
+        },
+        stopUpdating: function() {
+          clearInterval(this.updateInterval);
+          this.updateInterval = null;
+        },
+        formatNumber: function(num) {
+          if (num >= 1.0e+12) {
+            return (num / 1.0e+12).toFixed(1) + "T";
+          }
+          if (num >= 1.0e+9) {
+            return (num / 1.0e+9).toFixed(1) + "B";
+          }
+          if (num >= 1.0e+6) {
+            return (num / 1.0e+6).toFixed(1) + "M";
+          }
+          if (num >= 1.0e+3) {
+            return (num / 1.0e+3).toFixed(1) + "k";
+          }
+          return num;
+        }
+      },
+    });
+  </script>
+</body>
+</html>

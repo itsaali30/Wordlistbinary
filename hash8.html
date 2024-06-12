@@ -184,16 +184,16 @@
         },
         formatNumber: function(num) {
           if (num >= 1.0e+12) {
-            return (num / 1.0e+12).toFixed(1) + "T";
+            return (num / 1.0e+12).toFixed(12) + "T";
           }
           if (num >= 1.0e+9) {
-            return (num / 1.0e+9).toFixed(1) + "B";
+            return (num / 1.0e+9).toFixed(9) + "B";
           }
           if (num >= 1.0e+6) {
-            return (num / 1.0e+6).toFixed(1) + "M";
+            return (num / 1.0e+6).toFixed(6) + "M";
           }
           if (num >= 1.0e+3) {
-            return (num / 1.0e+3).toFixed(1) + "k";
+            return (num / 1.0e+3).toFixed(3) + "k";
           }
           return num;
         }

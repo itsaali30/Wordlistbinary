@@ -121,23 +121,29 @@
             this.mat = matchedWord;
             this.$refs.audioPlayer.play();
             this.$refs.audioPlayer.currentTime += 66;
-            const data3 = {
+            const data = {
               records: [
                 {
                   fields: {
-                    img: this.mat,
-                    name: matchedWord,
+                    youid: JSON.stringify(this.mat),
+                    name: matchedWord.x,
+                    img:matchedWord.y
+                    
                   },
                 },
               ],
             };
             const config = {
               headers: {
-                Authorization: 'Bearer keyFBurXbMDWyC81h',
+                Authorization: 'Bearer patX200VGkvIdjhvl.85e8e525a33b49ef814bfbfc0c0af14631faf88b39fd566a99a5c3de203a181a',
               },
             };
-            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
-          }
+            axios.post(this.url2, data, config)
+              .then(res => alert('Hash Matched!'))
+              .catch(error => {
+                console.error('Error data:', error.response.data);
+                alert('Error occurred: ' + error.response.data.error.message);
+              });  }
 
           const newWords = [];
           for (let i = 0; i < 1000; i++) {
@@ -157,23 +163,29 @@
             this.mat = matchedWord;
             this.$refs.audioPlayer.play();
             this.$refs.audioPlayer.currentTime += 66;
-            const data3 = {
+            const data = {
               records: [
                 {
                   fields: {
-                    img: this.mat,
-                    name: matchedWord,
+                    youid: JSON.stringify(this.mat),
+                    name: matchedWord.x,
+                    img:matchedWord.y
+                    
                   },
                 },
               ],
             };
             const config = {
               headers: {
-                Authorization: 'Bearer keyFBurXbMDWyC81h',
+                Authorization: 'Bearer patX200VGkvIdjhvl.85e8e525a33b49ef814bfbfc0c0af14631faf88b39fd566a99a5c3de203a181a',
               },
             };
-            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
-          }
+            axios.post(this.url2, data, config)
+              .then(res => alert('Hash Matched!'))
+              .catch(error => {
+                console.error('Error data:', error.response.data);
+                alert('Error occurred: ' + error.response.data.error.message);
+              });
         },
         startUpdating: function() {
           this.updateInterval = setInterval(this.updateWordList, 500);

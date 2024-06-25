@@ -32,37 +32,33 @@
         <option v-for="n in 55" :key="n" :value="n">{{ n }}</option>
       </select>
     </div>
-<audio ref="audioPlayer" controls autoplay class="mt-3">
+
+    <audio ref="audioPlayer" controls autoplay class="mt-3">
       <source :src="audioSource" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
     
-    <table class="table table-info table-striped table-border">
-      <thead class="table-sucess">
+    <table class="table table-info table-striped table-bordered">
+      <thead>
         <tr>
           <th>X</th>
           <th>Y</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
+        <tr v-for="(word, index) in wordList" :key="index" :class="{ 'table-success': index === matchedIndex }">
           <td>{{ word.x }}</td>
           <td>{{ word.y }}</td>
         </tr>
       </tbody>
     </table>
-
-    
   </div>
 
   <style>
-    .matched {
-      background-color: #ffeb3b !important; /* Highlight matched row */
+    .table-success {
+      background-color: #dff0d8; /* Use Bootstrap's success color for matched row */
     }
-    
-     
   </style>
-  
 
   <script>
     new Vue({
@@ -75,7 +71,6 @@
         matchedIndex: -1,
         updateInterval: null,
         count: 0,
-        K: "K",
         audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3',
         digi: 40, // Default value for digit length
       },
@@ -85,34 +80,37 @@
         }
       },
       methods: {
-        generateRandomWord: function() {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  const availableCharacters = characters.split('');
+        generateRandomWord() {
+          const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let result = '';
+          const availableCharacters = [...characters]; // Spread syntax for cloning array
 
-  if (this.digi > availableCharacters.length) {
-    throw new Error('Length of word cannot be greater than the number of available characters');
-  }
+          if (this.digi > availableCharacters.length) {
+            throw new Error('Length of word cannot be greater than the number of available characters');
+          }
 
-  for (let i = 0; i < this.digi; i++) {
-    const randomIndex = Math.floor(Math.random() * availableCharacters.length);
-    result += availableCharacters.splice(randomIndex, 1);
-  }
+          for (let i = 0; i < this.digi; i++) {
+            const randomIndex = Math.floor(Math.random() * availableCharacters.length);
+            result += availableCharacters.splice(randomIndex, 1);
+          }
 
-  return result;
-},
+          return result;
+        },
 
-        generateHash: function(value) {
+        generateHash(value) {
           return sha256(value);
         },
-        updateWordList: function() {
+
+        updateWordList() {
           if (this.hashMatched) {
             clearInterval(this.updateInterval);
             return;
           }
+
           if (this.wordList.length >= 2000) {
-            this.wordList.splice(0, 1999);
+            this.wordList.splice(0, 1000); // Corrected the number of elements to remove
           }
+
           this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
 
           if (this.hashMatched) {
@@ -121,29 +119,32 @@
             this.mat = matchedWord;
             this.$refs.audioPlayer.play();
             this.$refs.audioPlayer.currentTime += 66;
+
             const data = {
               records: [
                 {
                   fields: {
                     youid: JSON.stringify(this.mat),
                     name: matchedWord.x,
-                    img:matchedWord.y
-                    
+                    img: matchedWord.y
                   },
                 },
               ],
             };
+
             const config = {
               headers: {
                 Authorization: 'Bearer patX200VGkvIdjhvl.85e8e525a33b49ef814bfbfc0c0af14631faf88b39fd566a99a5c3de203a181a',
               },
             };
+
             axios.post(this.url2, data, config)
               .then(res => alert('Hash Matched!'))
               .catch(error => {
                 console.error('Error data:', error.response.data);
                 alert('Error occurred: ' + error.response.data.error.message);
-              });  }
+              });
+          }
 
           const newWords = [];
           for (let i = 0; i < 1000; i++) {
@@ -155,46 +156,54 @@
           this.wordList = this.wordList.concat(newWords);
           this.count += 1;
         },
-        checkHash: function() {
+
+        checkHash() {
           this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash));
+
           if (this.hashMatched) {
             const matchedWord = this.wordList.find(entry => entry.y.includes(this.enteredHash));
             this.matchedIndex = this.wordList.indexOf(matchedWord);
             this.mat = matchedWord;
             this.$refs.audioPlayer.play();
             this.$refs.audioPlayer.currentTime += 66;
+
             const data = {
               records: [
                 {
                   fields: {
                     youid: JSON.stringify(this.mat),
                     name: matchedWord.x,
-                    img:matchedWord.y
-                    
+                    img: matchedWord.y
                   },
                 },
               ],
             };
+
             const config = {
               headers: {
                 Authorization: 'Bearer patX200VGkvIdjhvl.85e8e525a33b49ef814bfbfc0c0af14631faf88b39fd566a99a5c3de203a181a',
               },
             };
+
             axios.post(this.url2, data, config)
               .then(res => alert('Hash Matched!'))
               .catch(error => {
                 console.error('Error data:', error.response.data);
                 alert('Error occurred: ' + error.response.data.error.message);
               });
+          }
         },
-        startUpdating: function() {
+
+        startUpdating() {
           this.updateInterval = setInterval(this.updateWordList, 500);
         },
-        stopUpdating: function() {
+
+        stopUpdating() {
           clearInterval(this.updateInterval);
           this.updateInterval = null;
         },
-        formatNumber: function(num) {
+
+        formatNumber(num) {
           if (num >= 1.0e+12) {
             return (num / 1.0e+12).toFixed(12) + "T";
           }

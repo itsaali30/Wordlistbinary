@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Word List</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h3>{{ count }}</h3>
+    <button @click="startUpdating" :disabled="updateInterval !== null">Start</button>
+    <button @click="stopUpdating" :disabled="updateInterval === null">Stop</button>
+    <br>
+    <hr/>
+    <!-- Inputs for entering hashes -->
+    <input v-model="enteredHash1" placeholder="Enter first hash to match">
+    <button @click="checkHash1">Check First Hash</button>
+
+    <input v-model="enteredHash2" placeholder="Enter second hash to match">
+    <button @click="checkHash2">Check Second Hash</button>
+
+    <input v-model="enteredHash3" placeholder="Enter third hash to match">
+    <button @click="checkHash3">Check Third Hash</button>
+    
+    <div v-if="hashMatched">
+      <h3>Hash Matched!</h3>
+      <p>binary: {{ mat.x }} | {{ mat.y }}</p>
+      <h3>value: {{ mat.z }}</h3>
+    </div>
+    
+    <ol>
+      <li v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
+        {{ word.x }} {{ word.y }}
+      </li>
+    </ol>
+    
+    <audio ref="audioPlayer" controls autoplay>
+      <source :src="audioSource" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+  <style>
+    .matched {
+      background-color: yellow;
+    }
+   button{
+        width:38%;
+       border-radius:20%;
+        margin:1%;
+        height:2em;
+    }
+    input{
+        width:50%;
+        height:2em;
+        margin:1%;
+    }
+  </style>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        wordList: [],
+        enteredHash1: '60b72880618022acdd032601f2c94fef596f68e07da9b2394c4b0a8c2a68f77f',
+        enteredHash2: 'ccff764bdb1f3692389199d8d15a66e577d7394f787b5c3114ecce26f679676a',
+        enteredHash3: 'a9ebd7be90e7dea055992d8772f9bee8e0f2cd9ace976eff1f07601195281122',
+        url2: 'https://api.airtable.com/v0/appUycLZwpqXOVZsQ/Youtube',
+        hashMatched: false,
+        matchedIndex: -1,
+        updateInterval: null,
+        count: 1,
+        audioSource: 'https://new.downloadming.ws/mediase/Yaadein...%20(2001)/03%20Is%20Ishq%20Mein%20Aisi%20Aag%20-%20www.downloadming.com.mp3//k',
+      },
+      methods: {
+        generateRandomWord: function() {
+          const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let result = '';
+          for (let i = 0; i < 40; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomIndex);
+          }
+          return result;
+        },
+        generateHash: function(value) {
+          return sha256(value);
+        },
+        updateWordList: function() {
+          if (this.hashMatched) {
+            clearInterval(this.updateInterval);
+            return;
+          }
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash1) || 
+                                                       entry.y.includes(this.enteredHash2) || 
+                                                       entry.y.includes(this.enteredHash3));
+
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => 
+              entry.y.includes(this.enteredHash1) || 
+              entry.y.includes(this.enteredHash2) || 
+              entry.y.includes(this.enteredHash3)
+            );
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat = matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
+            const data3 = {
+              records: [
+                {
+                  fields: {
+                    img: this.mat,
+                    name: matchedWord,
+                  },
+                },
+              ],
+            };
+            const config = {
+              headers: {
+                Authorization: 'Bearer keyFBurXbMDWyC81h',
+              },
+            };
+            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
+          }
+          const newWords = [];
+          for (let i = 0; i < 1000; i++) {
+            if (this.wordList.length >= 1000) {
+              this.wordList.splice(0, 999);
+            }
+            const realValue = this.generateRandomWord();
+            const hashedValue = this.generateHash(realValue);
+            newWords.push({ x: realValue, y: hashedValue });
+          }
+
+          this.wordList = this.wordList.concat(newWords);
+          this.count = this.wordList.length;
+        },
+        checkHash1: function() {
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash1));
+          this.handleHashCheck(this.enteredHash1);
+        },
+        checkHash2: function() {
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash2));
+          this.handleHashCheck(this.enteredHash2);
+        },
+        checkHash3: function() {
+          this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash3));
+          this.handleHashCheck(this.enteredHash3);
+        },
+        handleHashCheck: function(enteredHash) {
+          if (this.hashMatched) {
+            const matchedWord = this.wordList.find(entry => entry.y.includes(enteredHash));
+            this.matchedIndex = this.wordList.indexOf(matchedWord);
+            this.mat = matchedWord;
+            this.$refs.audioPlayer.play();
+            this.$refs.audioPlayer.currentTime += 66;
+            const data3 = {
+              records: [
+                {
+                  fields: {
+                    img: this.mat,
+                    name: matchedWord,
+                  },
+                },
+              ],
+            };
+            const config = {
+              headers: {
+                Authorization: 'Bearer keyFBurXbMDWyC81h',
+              },
+            };
+            axios.post(this.url2, data3, config).then(res => alert('Hash Matched!'));
+          }
+        },
+        startUpdating: function() {
+          this.updateInterval = setInterval(this.updateWordList, 100);
+        },
+        stopUpdating: function() {
+          clearInterval(this.updateInterval);
+          this.updateInterval = null;
+        },
+      },
+    });
+  </script>
+</body>
+</html>

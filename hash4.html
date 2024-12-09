@@ -20,7 +20,7 @@
     </div>
     <ul>
       <li v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
-        {{ word.x }} {{ word.y }}
+        {{ word.x.lenght }} {{ word.y.length }}
       </li>
     </ul>
     <audio ref="audioPlayer" controls autoplay>
@@ -41,7 +41,7 @@
       el: '#app',
       data: {
         wordList: [],
-        enteredHash: '',
+        enteredHash: 'c2e0d683a9550aa6e058dd1121ce6c115d17c615d6b9348c6baf0cf1d2647d92',
         hashMatched: false,
         matchedIndex: -1,
         updateInterval: null,
@@ -80,7 +80,7 @@ this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash
             alert('Hash Matched!');
           }
           const newWords = [];
-          for (let i = 0; i < 200; i++) {
+          for (let i = 0; i < 100000; i++) {
             const realValue = this.generateRandomWord();
             const hashedValue = this.generateHash(realValue);
             newWords.push({ x: realValue, y: hashedValue });
@@ -90,8 +90,8 @@ this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash
           this.count= this.wordList.length;
           
 
-          if (this.wordList.length >= 1000) {
-            this.wordList.splice(0, 500);
+          if (this.wordList.length >= 100000) {
+            this.wordList.splice(0, 99999);
           }
          },
         checkHash: function() {
@@ -109,7 +109,7 @@ this.hashMatched = this.wordList.some(entry => entry.y.includes(this.enteredHash
         },
         startUpdating: function() {
             
-          this.updateInterval = setInterval(this.updateWordList, 3/3000);
+          this.updateInterval = setInterval(this.updateWordList, 2000);
           
           
         },

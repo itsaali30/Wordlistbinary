@@ -18,11 +18,7 @@
       <p>binary:{{mat.x}}  | {{mat.y}}</p>
       <h3> value:{{mat.z}}</h3>
     </div>
-    <ul>
-      <li v-for="(word, index) in wordList" :key="index" :class="{ matched: index === matchedIndex }">
-        {{ word.x.lenght }} {{ word.y.length }}
-      </li>
-    </ul>
+    <div> {{wordList.length}}</div>
     <audio ref="audioPlayer" controls autoplay>
             <source :src="audioSource" type="audio/mp3">
             Your browser does not support the audio element.

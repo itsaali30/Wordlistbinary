@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue.js SPA - Profile Slide Menu</title>
+    <title>Vue.js SPA - Auto-Hide Profile Slide Menu</title>
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3"></script>
     <!-- Bootstrap 5 CSS & JS CDN -->
@@ -80,7 +80,7 @@
         }
     </style>
 </head>
-<body>
+<body @click="handleOutsideClick">
     <div id="app">
         <!-- Header -->
         <div class="header">
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Profile Slide Menu -->
-        <div :class="['profile-slide-menu', { active: showProfileSlideMenu }]">
+        <div :class="['profile-slide-menu', { active: showProfileSlideMenu }]" @mouseenter="resetAutoHide" @mouseleave="startAutoHide">
             <h5>Profile Menu</h5>
             <ul class="list-unstyled">
                 <li><a href="#"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
@@ -124,7 +124,7 @@
         <!-- Main Content -->
         <div class="container mt-5 text-center">
             <h2>{{ pageTitle }}</h2>
-            <p>Welcome to the Vue.js SPA with a slide profile menu!</p>
+            <p>Welcome to the Vue.js SPA with an auto-hide profile slide menu!</p>
         </div>
 
         <!-- Bottom Navigation Bar -->
@@ -143,12 +143,14 @@
                 return {
                     showProfileSlideMenu: false,
                     showSlideMenu: false,
-                    pageTitle: 'Home'
+                    pageTitle: 'Home',
+                    autoHideTimer: null,
                 };
             },
             methods: {
                 toggleProfileSlideMenu() {
                     this.showProfileSlideMenu = !this.showProfileSlideMenu;
+                    this.startAutoHide();
                 },
                 toggleSlideMenu() {
                     this.showSlideMenu = !this.showSlideMenu;
@@ -157,6 +159,20 @@
                     this.pageTitle = page;
                     this.showProfileSlideMenu = false;
                     this.showSlideMenu = false;
+                },
+                startAutoHide() {
+                    clearTimeout(this.autoHideTimer);
+                    this.autoHideTimer = setTimeout(() => {
+                        this.showProfileSlideMenu = false;
+                    }, 5000);
+                },
+                resetAutoHide() {
+                    clearTimeout(this.autoHideTimer);
+                },
+                handleOutsideClick(event) {
+                    if (!event.target.closest('.profile-slide-menu') && !event.target.closest('.fa-user-circle')) {
+                        this.showProfileSlideMenu = false;
+                    }
                 }
             }
         });

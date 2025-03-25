@@ -107,52 +107,18 @@
             transform: scale(1.1);
             color: #ffd700;
         }
-
-        /* Banner and Suggestions */
-        .carousel-item {
-            height: 300px;
-            background-color: #333;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-size: cover;
-            background-position: center;
-        }
-        .suggestions {
-            padding: 20px;
-            background-color: #fff;
-            margin: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .suggestions ul {
-            list-style: none;
-            padding: 0;
-        }
-        .suggestions li {
-            background: #f9f9f9;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            transition: background 0.3s, transform 0.3s;
-        }
-        .suggestions li:hover {
-            background-color: #ffefcc;
-            transform: scale(1.05);
-        }
     </style>
 </head>
 <body>
     <div id="app" @click="handleOutsideClick">
         <!-- Header -->
         <div class="header">
-            <h1>Alifmart Co.</h1>
             <i class="fas fa-user-circle" @click.stop="toggleProfileMenu"></i>
+            <h1>Alifmart Co.</h1>
             <i class="fas fa-bars" @click.stop="toggleSideMenu"></i>
         </div>
 
-        <!-- Profile Slide Menu -->
+        <!-- Profile Slide Menu (Left Corner) -->
         <div class="slide-menu profile-slide-menu" :class="{ active: showProfileMenu }" @click.stop>
             <h4>Profile Menu</h4>
             <button>Edit Profile</button>
@@ -163,36 +129,13 @@
             <button>Star Wallet</button>
         </div>
 
-        <!-- Side Slide Menu -->
+        <!-- Side Slide Menu (Right Side) -->
         <div class="slide-menu side-slide-menu" :class="{ active: showSideMenu }" @click.stop>
             <h4>Menu</h4>
-            <button>Login</button>
+            <button data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
             <button>Logout</button>
             <button>Settings</button>
             <button>More</button>
-        </div>
-
-        <!-- Banner Carousel -->
-        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active">AI Digital Market Insights</div>
-                <div class="carousel-item">Advanced Analytics</div>
-                <div class="carousel-item">Real-time Data Insights</div>
-                <div class="carousel-item">Personalized Marketing</div>
-                <div class="carousel-item">Innovative Tech Solutions</div>
-            </div>
-        </div>
-
-        <!-- AI Market Suggestions -->
-        <div class="suggestions">
-            <h3>Company Insights</h3>
-            <ul>
-                <li>AI-driven customer insights</li>
-                <li>Predictive analytics for strategy</li>
-                <li>Real-time data monitoring</li>
-                <li>Automated marketing solutions</li>
-                <li>Brand sentiment analysis</li>
-            </ul>
         </div>
 
         <!-- Bottom Navbar -->
@@ -205,10 +148,38 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const app = Vue.createApp({
             data() {
-                return { showProfileMenu: false, showSideMenu: false };
+                return {
+                    showProfileMenu: false,
+                    showSideMenu: false
+                };
             },
             methods: {
                 toggleProfileMenu() {
@@ -219,8 +190,11 @@
                     this.showSideMenu = !this.showSideMenu;
                     this.showProfileMenu = false;
                 },
-                handleOutsideClick() {
-                    this.showProfileMenu = this.showSideMenu = false;
+                handleOutsideClick(event) {
+                    if (!event.target.closest('.slide-menu')) {
+                        this.showProfileMenu = false;
+                        this.showSideMenu = false;
+                    }
                 }
             }
         }).mount('#app');

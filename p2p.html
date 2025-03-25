@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue.js SPA - Enhanced Profile Slide Menu</title>
+    <title>Vue.js SPA - Final Solution</title>
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3"></script>
-    <!-- Bootstrap 5 CSS & JS CDN -->
+    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome CDN -->
@@ -14,6 +14,7 @@
     <style>
         body {
             margin-bottom: 60px;
+            overflow-x: hidden;
         }
         .header {
             background-color: #f8f9fa;
@@ -22,8 +23,9 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
         }
-        .profile-slide-menu,
         .slide-menu {
             position: fixed;
             top: 0;
@@ -33,13 +35,13 @@
             box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
             padding: 20px;
             transition: transform 0.3s;
-            z-index: 1000;
+            z-index: 1;
         }
         .profile-slide-menu {
             left: 0;
             transform: translateX(-100%);
         }
-        .slide-menu {
+        .side-slide-menu {
             right: 0;
             transform: translateX(100%);
             box-shadow: -2px 0 6px rgba(0, 0, 0, 0.2);
@@ -72,64 +74,46 @@
         }
     </style>
 </head>
-<body @click="closeMenus">
-
-    <div id="app">
+<body>
+    <div id="app" @click="handleOutsideClick">
         <!-- Header -->
         <div class="header">
-            <!-- Profile Slide Menu Toggle -->
-            <i class="fas fa-user-circle menu-btn" @click.stop="toggleProfileSlideMenu"></i>
+            <!-- Profile Slide Menu Button -->
+            <i class="fas fa-user-circle menu-btn" @click.stop="toggleProfileMenu"></i>
 
-            <!-- Balance & Star Info -->
+            <!-- User Info -->
             <div>
                 <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Profile">
                 <strong>John Doe</strong> | Balance: ₹500 | <i class="fas fa-star text-warning"></i> 55
             </div>
 
-            <!-- Slide Menu Toggle Button -->
-            <i class="fas fa-bars menu-btn" @click.stop="toggleSlideMenu"></i>
+            <!-- Side Slide Menu Button -->
+            <i class="fas fa-bars menu-btn" @click.stop="toggleSideMenu"></i>
         </div>
 
         <!-- Profile Slide Menu -->
-        <div :class="['profile-slide-menu', { active: showProfileSlideMenu }]" 
-             @mouseenter="resetAutoHide" @mouseleave="startAutoHide" @click.stop>
+        <div class="slide-menu profile-slide-menu" :class="{ active: showProfileMenu }" @click.stop>
             <h5>Profile Menu</h5>
-            <div class="d-flex align-items-center mb-3">
+            <div class="mb-3">
                 <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Profile">
-                <div>
-                    <strong>John Doe</strong><br>
-                    Balance: ₹500 | <i class="fas fa-star text-warning"></i> 55
-                </div>
+                <strong>John Doe</strong><br>
+                Balance: ₹500 | <i class="fas fa-star text-warning"></i> 55
             </div>
-            <div class="d-grid gap-2">
-                <button class="btn btn-outline-primary" @click="setPage('Edit Profile')">
-                    <i class="fas fa-user-edit"></i> Edit Profile
-                </button>
-                <button class="btn btn-outline-success" @click="setPage('Add Bank')">
-                    <i class="fas fa-university"></i> Add Bank
-                </button>
-                <button class="btn btn-outline-info" @click="setPage('Add UPI')">
-                    <i class="fas fa-qrcode"></i> Add UPI
-                </button>
-                <button class="btn btn-outline-danger" @click="setPage('Complaint Raise')">
-                    <i class="fas fa-exclamation-circle"></i> Complaint Raise
-                </button>
-                <button class="btn btn-outline-warning" @click="setPage('KYC')">
-                    <i class="fas fa-id-card"></i> KYC
-                </button>
-                <button class="btn btn-outline-dark" @click="setPage('Star Wallet')">
-                    <i class="fas fa-wallet"></i> Star Wallet
-                </button>
-            </div>
+            <button class="btn btn-outline-primary mb-2"><i class="fas fa-user-edit"></i> Edit Profile</button>
+            <button class="btn btn-outline-success mb-2"><i class="fas fa-university"></i> Add Bank</button>
+            <button class="btn btn-outline-info mb-2"><i class="fas fa-qrcode"></i> Add UPI</button>
+            <button class="btn btn-outline-danger mb-2"><i class="fas fa-exclamation-circle"></i> Complaint Raise</button>
+            <button class="btn btn-outline-warning mb-2"><i class="fas fa-id-card"></i> KYC</button>
+            <button class="btn btn-outline-dark mb-2"><i class="fas fa-wallet"></i> Star Wallet</button>
         </div>
 
-        <!-- Right Side Menu -->
-        <div :class="['slide-menu', { active: showSlideMenu }]" @click.stop>
+        <!-- Side Slide Menu -->
+        <div class="slide-menu side-slide-menu" :class="{ active: showSideMenu }" @click.stop>
             <h5>Side Menu</h5>
             <button class="btn btn-outline-secondary mb-2"><i class="fas fa-sign-in-alt"></i> Login</button>
             <button class="btn btn-outline-secondary mb-2"><i class="fas fa-sign-out-alt"></i> Logout</button>
             <button class="btn btn-outline-secondary mb-2"><i class="fas fa-cog"></i> Settings</button>
-            <button class="btn btn-outline-secondary"><i class="fas fa-ellipsis-h"></i> More</button>
+            <button class="btn btn-outline-secondary mb-2"><i class="fas fa-ellipsis-h"></i> More</button>
         </div>
 
         <!-- Bottom Navigation -->
@@ -146,31 +130,24 @@
         const app = Vue.createApp({
             data() {
                 return {
-                    showProfileSlideMenu: false,
-                    showSlideMenu: false,
-                    autoHideTimer: null
+                    showProfileMenu: false,
+                    showSideMenu: false
                 };
             },
             methods: {
-                toggleProfileSlideMenu() {
-                    this.showProfileSlideMenu = !this.showProfileSlideMenu;
-                    this.startAutoHide();
+                toggleProfileMenu() {
+                    this.showProfileMenu = !this.showProfileMenu;
+                    this.showSideMenu = false;
                 },
-                toggleSlideMenu() {
-                    this.showSlideMenu = !this.showSlideMenu;
+                toggleSideMenu() {
+                    this.showSideMenu = !this.showSideMenu;
+                    this.showProfileMenu = false;
                 },
-                startAutoHide() {
-                    clearTimeout(this.autoHideTimer);
-                    this.autoHideTimer = setTimeout(() => {
-                        this.showProfileSlideMenu = false;
-                    }, 5000);
-                },
-                resetAutoHide() {
-                    clearTimeout(this.autoHideTimer);
-                },
-                closeMenus(event) {
-                    this.showProfileSlideMenu = false;
-                    this.showSlideMenu = false;
+                handleOutsideClick(event) {
+                    if (!event.target.closest('.profile-slide-menu') && !event.target.closest('.side-slide-menu')) {
+                        this.showProfileMenu = false;
+                        this.showSideMenu = false;
+                    }
                 }
             }
         });

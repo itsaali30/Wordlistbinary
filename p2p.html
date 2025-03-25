@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue.js SPA - Final Solution</title>
+    <title>Vue.js + PixiJS SPA</title>
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3"></script>
     <!-- Bootstrap 5 CDN -->
@@ -11,31 +11,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- PixiJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/browser/pixi.min.js"></script>
     <style>
-        body {
-            margin-bottom: 60px;
+        body, html {
+            margin: 0;
+            padding: 0;
             overflow-x: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+        }
+        #app {
+            position: relative;
+            z-index: 2;
+            color: white;
+        }
+        #background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
         }
         .header {
-            background-color: #f8f9fa;
-            padding: 10px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
         }
         .slide-menu {
             position: fixed;
             top: 0;
-            width: 250px;
             height: 100%;
-            background-color: #fff;
-            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.4);
             padding: 20px;
             transition: transform 0.3s;
-            z-index: 1;
+            z-index: 2;
         }
         .profile-slide-menu {
             left: 0;
@@ -44,7 +62,6 @@
         .side-slide-menu {
             right: 0;
             transform: translateX(100%);
-            box-shadow: -2px 0 6px rgba(0, 0, 0, 0.2);
         }
         .active {
             transform: translateX(0);
@@ -53,79 +70,92 @@
             position: fixed;
             bottom: 0;
             width: 100%;
-            background-color: #f8f9fa;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+            background-color: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.5);
+            z-index: 2;
         }
         .bottom-nav a {
-            padding: 10px;
-            color: #333;
-            text-align: center;
+            color: white;
             text-decoration: none;
+            text-align: center;
             flex-grow: 1;
+            transition: color 0.3s;
         }
         .bottom-nav a:hover {
-            background-color: #ddd;
+            color: #FFD700;
         }
         .menu-btn {
             font-size: 1.5rem;
+            color: white;
             cursor: pointer;
+            transition: color 0.3s;
+        }
+        .menu-btn:hover {
+            color: #FFD700;
+        }
+        button {
+            margin-top: 10px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #FFD700;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #FFD700;
+            color: black;
         }
     </style>
 </head>
 <body>
+    <!-- PixiJS Background -->
+    <div id="background"></div>
+
     <div id="app" @click="handleOutsideClick">
         <!-- Header -->
         <div class="header">
-            <!-- Profile Slide Menu Button -->
             <i class="fas fa-user-circle menu-btn" @click.stop="toggleProfileMenu"></i>
-
-            <!-- User Info -->
             <div>
                 <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Profile">
                 <strong>John Doe</strong> | Balance: ₹500 | <i class="fas fa-star text-warning"></i> 55
             </div>
-
-            <!-- Side Slide Menu Button -->
             <i class="fas fa-bars menu-btn" @click.stop="toggleSideMenu"></i>
         </div>
 
         <!-- Profile Slide Menu -->
         <div class="slide-menu profile-slide-menu" :class="{ active: showProfileMenu }" @click.stop>
-            <h5>Profile Menu</h5>
-            <div class="mb-3">
-                <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Profile">
-                <strong>John Doe</strong><br>
-                Balance: ₹500 | <i class="fas fa-star text-warning"></i> 55
-            </div>
-            <button class="btn btn-outline-primary mb-2"><i class="fas fa-user-edit"></i> Edit Profile</button>
-            <button class="btn btn-outline-success mb-2"><i class="fas fa-university"></i> Add Bank</button>
-            <button class="btn btn-outline-info mb-2"><i class="fas fa-qrcode"></i> Add UPI</button>
-            <button class="btn btn-outline-danger mb-2"><i class="fas fa-exclamation-circle"></i> Complaint Raise</button>
-            <button class="btn btn-outline-warning mb-2"><i class="fas fa-id-card"></i> KYC</button>
-            <button class="btn btn-outline-dark mb-2"><i class="fas fa-wallet"></i> Star Wallet</button>
+            <h4>Profile Menu</h4>
+            <button><i class="fas fa-user-edit"></i> Edit Profile</button>
+            <button><i class="fas fa-university"></i> Add Bank</button>
+            <button><i class="fas fa-qrcode"></i> Add UPI</button>
+            <button><i class="fas fa-exclamation-circle"></i> Complaint</button>
+            <button><i class="fas fa-id-card"></i> KYC</button>
+            <button><i class="fas fa-wallet"></i> Star Wallet</button>
         </div>
 
         <!-- Side Slide Menu -->
         <div class="slide-menu side-slide-menu" :class="{ active: showSideMenu }" @click.stop>
-            <h5>Side Menu</h5>
-            <button class="btn btn-outline-secondary mb-2"><i class="fas fa-sign-in-alt"></i> Login</button>
-            <button class="btn btn-outline-secondary mb-2"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            <button class="btn btn-outline-secondary mb-2"><i class="fas fa-cog"></i> Settings</button>
-            <button class="btn btn-outline-secondary mb-2"><i class="fas fa-ellipsis-h"></i> More</button>
+            <h4>Side Menu</h4>
+            <button><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <button><i class="fas fa-cog"></i> Settings</button>
+            <button><i class="fas fa-ellipsis-h"></i> More</button>
         </div>
 
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="#"><i class="fas fa-home"></i> Home</a>
-            <a href="#"><i class="fas fa-user"></i> My Account</a>
+            <a href="#"><i class="fas fa-user"></i> Account</a>
             <a href="#"><i class="fas fa-shopping-cart"></i> Buy</a>
-            <a href="#"><i class="fas fa-dollar-sign"></i> Sale</a>
-            <a href="#"><i class="fas fa-exchange-alt"></i> Transaction</a>
+            <a href="#"><i class="fas fa-dollar-sign"></i> Sell</a>
+            <a href="#"><i class="fas fa-exchange-alt"></i> Transactions</a>
         </div>
     </div>
 
+    <!-- Vue.js and PixiJS Script -->
     <script>
         const app = Vue.createApp({
             data() {
@@ -144,14 +174,33 @@
                     this.showProfileMenu = false;
                 },
                 handleOutsideClick(event) {
-                    if (!event.target.closest('.profile-slide-menu') && !event.target.closest('.side-slide-menu')) {
+                    if (!event.target.closest('.slide-menu')) {
                         this.showProfileMenu = false;
                         this.showSideMenu = false;
                     }
+                },
+                initPixiJS() {
+                    const app = new PIXI.Application({ backgroundAlpha: 0, resizeTo: window });
+                    document.getElementById('background').appendChild(app.view);
+
+                    for (let i = 0; i < 50; i++) {
+                        const star = new PIXI.Graphics();
+                        star.beginFill(0xFFD700).drawCircle(0, 0, Math.random() * 3 + 1).endFill();
+                        star.x = Math.random() * window.innerWidth;
+                        star.y = Math.random() * window.innerHeight;
+                        app.stage.addChild(star);
+
+                        app.ticker.add(() => {
+                            star.x += Math.random() - 0.5;
+                            star.y += Math.random() - 0.5;
+                        });
+                    }
                 }
+            },
+            mounted() {
+                this.initPixiJS();
             }
         });
-
         app.mount('#app');
     </script>
 </body>

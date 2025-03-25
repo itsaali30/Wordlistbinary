@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue.js + PixiJS SPA</title>
+    <title>Alifmart Co.</title>
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3"></script>
     <!-- Bootstrap 5 CDN -->
@@ -15,36 +15,41 @@
         body, html {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
             font-family: Arial, sans-serif;
-            background-color: #121212;
+            background-color: #f4f4f9;
+            overflow-x: hidden;
         }
-        #app {
-            position: relative;
-            z-index: 2;
-            color: white;
-        }
+
+        /* Header Styling */
         .header {
             padding: 10px 20px;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(90deg, #ff8a00, #e52e71);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-            z-index: 2;
-            color: white;
+            position: relative;
+            z-index: 3;
         }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        /* Slide Menu Styling */
         .slide-menu {
             position: fixed;
             top: 0;
-            height: 100%;
+            bottom: 0;
             width: 250px;
             background: linear-gradient(90deg, #e52e71, #ff8a00);
             color: white;
-            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.5);
             padding: 20px;
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s;
-            z-index: 3;
+            z-index: 2;
         }
         .profile-slide-menu {
             left: 0;
@@ -54,9 +59,29 @@
             right: 0;
             transform: translateX(100%);
         }
-        .active {
+        .slide-menu.active {
             transform: translateX(0);
         }
+        .slide-menu h4 {
+            margin-bottom: 15px;
+        }
+        .slide-menu button {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #ffd700;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .slide-menu button:hover {
+            background-color: #ffd700;
+            color: black;
+            transform: scale(1.05);
+        }
+
+        /* Bottom Navbar Styling */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -82,65 +107,95 @@
             transform: scale(1.1);
             color: #ffd700;
         }
-        .menu-btn {
-            font-size: 1.5rem;
+
+        /* Banner and Suggestions */
+        .carousel-item {
+            height: 300px;
+            background-color: #333;
             color: white;
-            cursor: pointer;
-            transition: color 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
         }
-        .menu-btn:hover {
-            color: #ffd700;
+        .suggestions {
+            padding: 20px;
+            background-color: #fff;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        button {
-            margin-top: 10px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid #ffd700;
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+        .suggestions li {
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 10px;
             border-radius: 5px;
             transition: background 0.3s, transform 0.3s;
-            padding: 10px;
         }
-        button:hover {
-            background-color: #ffd700;
-            color: black;
+        .suggestions li:hover {
+            background-color: #ffefcc;
             transform: scale(1.05);
         }
     </style>
 </head>
 <body>
-    <div id="app" @click="closeMenusOnOutsideClick">
+    <div id="app" @click="handleOutsideClick">
         <!-- Header -->
         <div class="header">
-            <i class="fas fa-user-circle menu-btn" @click.stop="toggleProfileMenu"></i>
-            <div>
-                <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Profile">
-                <strong>John Doe</strong> | ₹500 | <i class="fas fa-star text-warning"></i> 55
-            </div>
-            <i class="fas fa-bars menu-btn" @click.stop="toggleSideMenu"></i>
+            <h1>Alifmart Co.</h1>
+            <i class="fas fa-user-circle" @click.stop="toggleProfileMenu"></i>
+            <i class="fas fa-bars" @click.stop="toggleSideMenu"></i>
         </div>
 
         <!-- Profile Slide Menu -->
-        <div class="slide-menu profile-slide-menu" :class="{ active: showProfileMenu }" @click.stop @mouseenter="resetHideTimer" @mouseleave="startHideTimer">
+        <div class="slide-menu profile-slide-menu" :class="{ active: showProfileMenu }" @click.stop>
             <h4>Profile Menu</h4>
-            <button><i class="fas fa-user-edit"></i> Edit Profile</button>
-            <button><i class="fas fa-university"></i> Add Bank</button>
-            <button><i class="fas fa-qrcode"></i> Add UPI</button>
-            <button><i class="fas fa-exclamation-circle"></i> Complaint</button>
-            <button><i class="fas fa-id-card"></i> KYC</button>
-            <button><i class="fas fa-wallet"></i> Star Wallet</button>
+            <button>Edit Profile</button>
+            <button>Add Bank</button>
+            <button>Add UPI</button>
+            <button>Complaint</button>
+            <button>KYC</button>
+            <button>Star Wallet</button>
         </div>
 
         <!-- Side Slide Menu -->
-        <div class="slide-menu side-slide-menu" :class="{ active: showSideMenu }" @click.stop @mouseenter="resetHideTimer" @mouseleave="startHideTimer">
-            <h4>Side Menu</h4>
-            <button><i class="fas fa-sign-in-alt"></i> Login</button>
-            <button><i class="fas fa-sign-out-alt"></i> Logout</button>
-            <button><i class="fas fa-cog"></i> Settings</button>
-            <button><i class="fas fa-ellipsis-h"></i> More</button>
+        <div class="slide-menu side-slide-menu" :class="{ active: showSideMenu }" @click.stop>
+            <h4>Menu</h4>
+            <button>Login</button>
+            <button>Logout</button>
+            <button>Settings</button>
+            <button>More</button>
         </div>
 
-        <!-- Bottom Navigation -->
+        <!-- Banner Carousel -->
+        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">AI Digital Market Insights</div>
+                <div class="carousel-item">Advanced Analytics</div>
+                <div class="carousel-item">Real-time Data Insights</div>
+                <div class="carousel-item">Personalized Marketing</div>
+                <div class="carousel-item">Innovative Tech Solutions</div>
+            </div>
+        </div>
+
+        <!-- AI Market Suggestions -->
+        <div class="suggestions">
+            <h3>Company Insights</h3>
+            <ul>
+                <li>AI-driven customer insights</li>
+                <li>Predictive analytics for strategy</li>
+                <li>Real-time data monitoring</li>
+                <li>Automated marketing solutions</li>
+                <li>Brand sentiment analysis</li>
+            </ul>
+        </div>
+
+        <!-- Bottom Navbar -->
         <div class="bottom-nav">
             <a href="#"><i class="fas fa-home"></i> Home</a>
             <a href="#"><i class="fas fa-user"></i> Account</a>
@@ -150,46 +205,25 @@
         </div>
     </div>
 
-    <!-- Vue.js Script -->
     <script>
         const app = Vue.createApp({
             data() {
-                return {
-                    showProfileMenu: false,
-                    showSideMenu: false,
-                    hideTimer: null
-                };
+                return { showProfileMenu: false, showSideMenu: false };
             },
             methods: {
                 toggleProfileMenu() {
-                    this.closeAllMenus();
                     this.showProfileMenu = !this.showProfileMenu;
-                    this.startHideTimer();
-                },
-                toggleSideMenu() {
-                    this.closeAllMenus();
-                    this.showSideMenu = !this.showSideMenu;
-                    this.startHideTimer();
-                },
-                closeAllMenus() {
-                    this.showProfileMenu = false;
                     this.showSideMenu = false;
                 },
-                closeMenusOnOutsideClick(event) {
-                    if (!event.target.closest('.slide-menu') && !event.target.closest('.menu-btn')) {
-                        this.closeAllMenus();
-                    }
+                toggleSideMenu() {
+                    this.showSideMenu = !this.showSideMenu;
+                    this.showProfileMenu = false;
                 },
-                startHideTimer() {
-                    clearTimeout(this.hideTimer);
-                    this.hideTimer = setTimeout(this.closeAllMenus, 2000);
-                },
-                resetHideTimer() {
-                    clearTimeout(this.hideTimer);
+                handleOutsideClick() {
+                    this.showProfileMenu = this.showSideMenu = false;
                 }
             }
-        });
-        app.mount('#app');
+        }).mount('#app');
     </script>
 </body>
 </html>

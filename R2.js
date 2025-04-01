@@ -1,3 +1,3 @@
-rf(){
+function rf(){
 alert("test")
 };

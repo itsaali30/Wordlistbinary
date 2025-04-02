@@ -109,6 +109,31 @@
                 </div>
         <router-view></router-view>
     </div>
+<script type="text/x-template" id="sell-template">
+    <div>
+        <h2>Sell Page</h2>
+        <p>Sell your products here.</p>
+        <button @click="showAlert">Click Me</button>
+    </div>
+</script>
+
+<script>
+    const Sell = {
+        template: "#sell-template",
+        mounted() {
+            this.sellMounted();
+        },
+        methods: {
+            sellMounted() {
+                alert(0);
+            },
+            showAlert() {
+                alert("Button clicked!");
+            }
+        }
+    };
+</script>
+
 
     <script>
         const store = Vuex.createStore({
@@ -138,7 +163,7 @@
         
         const Account = { template: '<h2>Account Page</h2>' };
         const Buy = { template: '<h2>Buy Page</h2>' };
-        const Sell = { template: '<h2>Sell Page</h2>' };
+      //const Sell = { template: '<h2>Sell Page</h2>' };
         const Transactions = { template: '<h2>Transactions Page</h2>' };
         
         const router = VueRouter.createRouter({

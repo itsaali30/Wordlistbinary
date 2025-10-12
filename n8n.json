@@ -1,0 +1,95 @@
+{
+  "name": "Sheet AI Story Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": { "item": [] },
+        "mode": "everyMinute"
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "Sheet1!A:E",
+        "options": {
+          "filters": [
+            {
+              "column": "Status",
+              "operation": "equal",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "name": "Read Pending Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.map(item => {\n  const title = item.json.Title;\n  return {\n    json: {\n      sno: item.json.Sno,\n      title: title,\n      hindiPrompt: `Write a 200-word children's story in Hindi titled \"${title}\"`,\n      englishPrompt: `Write a 200-word children's story in English titled \"${title}\"`\n    }\n  };\n});"
+      },
+      "name": "Prepare Prompts",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "input": "={{$json.hindiPrompt}}",
+        "additionalFields": {}
+      },
+      "name": "AI Hindi Story",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1000, 200]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "input": "={{$json.englishPrompt}}",
+        "additionalFields": {}
+      },
+      "name": "AI English Story",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "Sheet1!A:E",
+        "keyRow": "Sno",
+        "keyRowValue": "={{$json.sno}}",
+        "options": {},
+        "columns": {
+          "Hindi": "={{$node['AI Hindi Story'].json.choices[0].text}}",
+          "English": "={{$node['AI English Story'].json.choices[0].text}}",
+          "Status": "Success"
+        }
+      },
+      "name": "Update Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Cron": { "main": [[{"node": "Read Pending Rows", "type": "main", "index": 0}]] },
+    "Read Pending Rows": { "main": [[{"node": "Prepare Prompts", "type": "main", "index": 0}]] },
+    "Prepare Prompts": { "main": [
+      [
+        {"node": "AI Hindi Story", "type": "main", "index": 0},
+        {"node": "AI English Story", "type": "main", "index": 0}
+      ]
+    ]},
+    "AI Hindi Story": { "main": [[{"node": "Update Row", "type": "main", "index": 0}]] },
+    "AI English Story": { "main": [[{"node": "Update Row", "type": "main", "index": 0}]] }
+  }
+}

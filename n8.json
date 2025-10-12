@@ -32,7 +32,7 @@
     },
     {
       "parameters": {
-        "functionCode": "return items.map(item => {\n  const title = item.json.Title;\n  return {\n    json: {\n      sno: item.json.Sno,\n      title: title,\n      prompt: `Write a 200-word children's story in Hindi and English titled \"${title}\". Output in JSON format as {\"Hindi\": \"...\", \"English\": \"...\"}`\n    }\n  };\n});"
+        "functionCode": "return items.map(item => {\n  const title = item.json.Title;\n  return {\n    json: {\n      sno: item.json.Sno,\n      title: title,\n      prompt: `Write a 200-word children's story in Hindi and English titled \"${title}\". Output ONLY in JSON format as {\\\"Hindi\\\": \\\"...\\\", \\\"English\\\": \\\"...\\\"}. Do not include any introductory or concluding text outside the JSON object.`\n    }\n  };\n});"
       },
       "name": "Prepare Prompt",
       "type": "n8n-nodes-base.function",
@@ -41,11 +41,11 @@
     },
     {
       "parameters": {
-        "model": "gemini-1",
+        "model": "gemini-2.5-flash",
         "input": "={{$json.prompt}}",
         "additionalFields": {
           "temperature": 0.7,
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1024
         }
       },
       "name": "Gemini AI Story",
@@ -60,8 +60,8 @@
         "keyRow": "Sno",
         "keyRowValue": "={{$json.sno}}",
         "columns": {
-          "Hindi": "={{JSON.parse($node['Gemini AI Story'].json.choices[0].message.content).Hindi}}",
-          "English": "={{JSON.parse($node['Gemini AI Story'].json.choices[0].message.content).English}}",
+          "Hindi": "={{JSON.parse($node['Gemini AI Story'].json.text).Hindi}}",
+          "English": "={{JSON.parse($node['Gemini AI Story'].json.text).English}}",
           "Status": "Success"
         }
       },

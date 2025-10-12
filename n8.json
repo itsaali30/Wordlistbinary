@@ -1,0 +1,80 @@
+{
+  "name": "Sheet AI Story Generator Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {},
+        "mode": "everyMinute"
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "Sheet1!A:E",
+        "options": {
+          "filters": [
+            {
+              "column": "Status",
+              "operation": "equal",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "name": "Read Pending Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.map(item => {\n  const title = item.json.Title;\n  return {\n    json: {\n      sno: item.json.Sno,\n      title: title,\n      prompt: `Write a 200-word children's story in Hindi and English titled \"${title}\". Output in JSON format as {\"Hindi\": \"...\", \"English\": \"...\"}`\n    }\n  };\n});"
+      },
+      "name": "Prepare Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1",
+        "input": "={{$json.prompt}}",
+        "additionalFields": {
+          "temperature": 0.7,
+          "maxOutputTokens": 500
+        }
+      },
+      "name": "Gemini AI Story",
+      "type": "n8n-nodes-base.ai",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "Sheet1!A:E",
+        "keyRow": "Sno",
+        "keyRowValue": "={{$json.sno}}",
+        "columns": {
+          "Hindi": "={{JSON.parse($node['Gemini AI Story'].json.choices[0].message.content).Hindi}}",
+          "English": "={{JSON.parse($node['Gemini AI Story'].json.choices[0].message.content).English}}",
+          "Status": "Success"
+        }
+      },
+      "name": "Update Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Cron": { "main": [[{"node": "Read Pending Rows", "type": "main", "index": 0}]] },
+    "Read Pending Rows": { "main": [[{"node": "Prepare Prompt", "type": "main", "index": 0}]] },
+    "Prepare Prompt": { "main": [[{"node": "Gemini AI Story", "type": "main", "index": 0}]] },
+    "Gemini AI Story": { "main": [[{"node": "Update Row", "type": "main", "index": 0}]] }
+  }
+}

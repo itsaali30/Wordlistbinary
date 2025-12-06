@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hex to Binary Converter</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <script src="cordova.js"></script>
+        <script src="js/index.js"></script>
+</head>
+<body>
+
+<div id="app">
+  <H3>TEMP59:{{p[4]}}</H3>
+  <H3>57A:{{Alist[6]}}</H3>
+  <H3>57B:{{Blist[6]}}</H3>
+  <button @click="performStep10">Perform Step 10</button>
+  <button @click="performStep11">Perform Step 11</button>
+  <h2>Result:</h2>
+  <p>{{ resultX }}</p>
+  <h3>Number of 'x': {{ xCount }}</h3>
+  <h2>majxfindlength:{{majXlist.length}}</h2>
+ 
+  <label for="hexInput">Enter Hexadecimal (length 64):</label>
+  <input v-model="hexInput" id="hexInput" :maxlength="64">
+  <button @click="performStep7">Step 7</button>
+  <p v-if="binaryResult">Binary Result:{{binaryResult.length}}</p>
+  <div v-for="line in binaryLines" :key="line">{{ line }}</div>
+  <p v-if="decimalResult">Decimal Result:</p>
+  <div v-for="line in decimalLines" :key="line">{{ line }}</div>
+  <p v-if="mainDecimalResult">Main Decimal Result:</p>
+  <div v-for="line in mainDecimalLines" :key="line">{{ line }}</div>
+  <p v-if="right32BinaryResult">Right 32 Binary Result:</p>
+  <div v-for="line in right32BinaryLines" :key="line">{{ line }}</div>
+
+
+
+ 
+  <p v-ifelse="aToHBinaryResult">Lines for a to h:</p>
+  <div v-for="(line, index) in aToHBinaryLines" :key="index">{{ String.fromCharCode(97 + index) }}: {{ line }}</div>
+  
+  <p v-if="updatedLines">Updated Lines:</p>
+  <div v-for="line in updatedLines" :key="line">{{ line }}</div>
+  
+  <pre>H:{{h}}</pre>
+  <pre>G:{{g}}</pre>
+  <pre>F:{{f}}</pre>
+  <pre>E:{{e}}</pre>
+  <pre>D:{{d}}</pre>
+  <pre>C:{{c}}</pre>
+  <pre>B:{{b}}</pre>
+  <pre>A:{{a}}</pre>
+  <pre>W:{{Wlist}}</pre>
+  <pre>p:{{p}}</pre>
+  
+  
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      hexInput: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      binaryResult: '',
+      binaryLines: [],
+      decimalResult: '',
+      decimalLines: [],
+      mainDecimalResult: '',
+      mainDecimalLines: [],
+      right32BinaryResult: '',
+      right32BinaryLines: [],
+      aToHBinaryResult: '',
+      aToHBinaryLines: [],
+      updatedLines: [],      
+      sigma0Result: [],
+      updatedValues:{},
+      stepHW63:[],
+      news:[],
+      wo:["10000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","00000000000000000000000000000000","10000000000000000000000000000000","00000000000000000000000000000000","00000000001000000101000000000000","00000000000000000000000000000000","00100010000000000000100000000000","00000000000000000000000000000000","00000101000010001001010101000010","10000000000000000000000000000000","01011000000010000000000000000000","00000000010000001010000000000000","00000000000101100010010100000101","01100110000000000001100000000000","11010110001000100010010110000000","00010100001000100101010100001000","11010110010001011111100101011100","11001001001010000010000000000000","11000011111100010000000010010100","00101000010011001010011101100110","00000110100010000110110111000110","10100011011110111111000100010110","01110001011111001011111010010110","11111110110000101101011101001010","10100111101101100111111100000000","10000001000101011001011010100010","10011000101001101110011101101000","00000011101100100000110010000010","01011101000111011010011111001001","10110001010101101011100100110101","11000011110111011100101000010001","00100100100111000001000001111111","11000100100011010010010011101111","01011101111001010100110000110000","11011110111111101100111001100101","00101100101000010100100000001101","00111100000101010011001100101100","00000001110011101100100110101101","00010110000011001100110011010000","00001011101011001101101010011000","00110110000110111000111111100000","11010010001100100000101110100110","00000010100110110111000000000111","01110101010001100101100001111100","00000111111101010100111100111001","11111000000010001101110111000011","11011100110010100111011000001000","01011110010000100111000110001000","01000100101111001110110001011101","00111011010111101100010010011011",],
+      KBinaryLines : [
+    "01000010100010100010111110011000",
+    "01110001001101110100010010010001",
+    "10110101110000001111101111001111",
+    "11101001101101011101101110100101",
+    "00111001010101101100001001011011",
+    "01011001111100010001000111110001",
+    "10010010001111111000001010100100",
+    "10101011000111000101111011010101",
+    "11011000000001111010101010011000",
+    "00010010100000110101101100000001",
+    "00100100001100011000010110111110",
+    "01010101000011000111110111000011",
+    "01110010101111100101110101110100",
+    "10000000110111101011000111111110",
+    "10011011110111000000011010100111",
+    "11000001100110111111000101110100",
+    "11100100100110110110100111000001",
+    "11101111101111100100011110000110",
+    "00001111110000011001110111000110",
+    "00100100000011001010000111001100",
+    "00101101111010010010110001101111",
+    "01001010011101001000010010101010",
+    "01011100101100001010100111011100",
+    "01110110111110011000100011011010",
+    "10011000001111100101000101010010",
+    "10101000001100011100011001101101",
+    "10110000000000110010011111001000",
+    "10111111010110010111111111000111",
+    "11000110111000000000101111110011",
+    "11010101101001111001000101000111",
+    "00000110110010100110001101010001",
+    "00010100001010010010100101100111",
+    "00100111101101110000101010000101",
+    "00101110000110110010000100111000",
+    "01001101001011000110110111111100",
+    "01010011001110000000110100010011",
+    "01100101000010100111001101010100",
+    "01110110011010100000101010111011",
+    "10000001110000101100100100101110",
+    "10010010011100100010110010000101",
+    "10100010101111111110100010100001",
+    "10101000000110100110011001001011",
+    "11000010010010111000101101110000",
+    "11000111011011000101000110100011",
+    "11010001100100101110100000011001",
+    "11010110100110010000011000100100",
+    "11110100000011100011010110000101",
+    "00010000011010101010000001110000",
+    "00011001101001001100000100010110",
+    "00011110001101110110110000001000",
+    "00100111010010000111011101001100",
+    "00110100101100001011110010110101",
+    "00111001000111000000110010110011",
+    "01001110110110001010101001001010",
+    "01011011100111001100101001001111",
+    "01101000001011100110111111110011",
+    "01110100100011111000001011101110",
+    "01111000101001010110001101101111",
+    "10000100110010000111100000010100",
+    "10001100110001110000001000001000",
+    "10010000101111101111111111111010",
+    "10100100010100000110110011101011",
+    "10111110111110011010001111110111",
+    "11000110011100010111100011110010",
+    
+  ],
+  Hlist:
+[
+  "10101010111011111010000001000100",
+  "00001000111000001110011011101010",
+  "11100010101010010001111011011100",
+  "01111001010100011010001100110000",
+  "10101101111110010100111000001010",
+  "11100101100010001110010110011000",
+  "11111101100110011001001101101110",
+  "01000011101001011101111011111000",
+  "10100001100101001101000101001111",
+  "00110110000001101000101111011110",
+  "11101001000010101010011101110000",
+  "01001100101010110110110110001010",
+  "11001011101100111111100011101011",
+  "10001010011010101000001010110010",
+  "11010010100001011100011001111001",
+  "10101010001011000001100000010000",
+  "00101001010000100110110010101010",
+  "11100000010000000011111010111001",
+  "11110101110001011000101011101001",
+  "10000100100110000111100111011111",
+  "01110001011010111011000000100101",
+  "10000101101001110001010000100100",
+  "11101000000001111110101001111111",
+  "11111010110000000110101011101101",
+  "00111010011100000101111010101001",
+  "01101001011100111010101011000010",
+  "00001011110001000101011111011111",
+  "11001100110100100101110110001011",
+  "10111011110101111000010001101100",
+  "01010110010010100110011000100110",
+  "10110000010010101011001000101101",
+  "10010101011010010110101101110101",
+  "01100110111011010101010011111010",
+  "10011111100100110100001010000011",
+  "11100101011110101100001111110100",
+  "11110101010111111000110000100101",
+  "00101100001011000000001010001101",
+  "10110001011001010011011100010000",
+  "11000010100001111001100000011110",
+  "00111001100101010011110011001101",
+  "10010000000011010010011110101100",
+  "11010011100110001101110011101010",
+  "01100000100011001001001111010011",
+  "01110000110101000011101010100111",
+  "01011100101110001110100001100011",
+  "00011100110011111010110000111001",
+  "00101011010000100111001010010110",
+  "11001101111111011111111001010010",
+  "11010111111000000111110010010010",
+  "11100010001101100100001111001110",
+  "01010011000001110010001010001001",
+  "01111010101011111100011000011000",
+  "01010011111110010100110111001011",
+  "10000010111011011110000001101111",
+  "01001111011001010100000011111010",
+  "11100111110100000110010000011110",
+  "00110000001101111110000110110101",
+  "01101111110110110010001011111010",
+  "00100000000000011011001001010110",
+  "00011000110001111110001010100010",
+  "01010001000011100101001001111111",
+  "10011011000001010110100010001100",
+  "00011111100000111101100110101011",
+  "01011011111000001100110100011001"
+],
+  Elist:["10000000000000000000000000000000",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "10000000000000000000000000000000",
+  "0",
+  "00000000001000000101000000000000",
+
+"0",
+
+"00100010000000000000100000000000",
+
+"0",
+
+"00000101000010001001010101000010",
+
+"10000000000000000000000000000000",
+
+"01011000000010000000000000000000",
+
+"00000000010000001010000000000000",
+
+"00000000000101100010010100000101",
+
+"01100110000000000001100000000000",
+
+"11010110001000100010010110000000",
+
+"00010100001000100101010100001000",
+
+"11010110010001011111100101011100",
+
+"11001001001010000010000000000000",
+
+"11000011111100010000000010010100",
+
+"00101000010011001010011101100110",
+
+"00000110100010000110110111000110",
+
+"10100011011110111111000100010110",
+
+"01110001011111001011111010010110",
+
+"11111110110000101101011101001010",
+
+"10100111101101100111111100000000",
+
+"10000001000101011001011010100010",
+
+"10011000101001101110011101101000",
+
+"00000011101100100000110010000010",
+
+"01011101000111011010011111001001",
+
+"10110001010101101011100100110101",
+
+"11000011110111011100101000010001",
+
+"00100100100111000001000001111111",
+
+"11000100100011010010010011101111",
+
+"01011101111001010100110000110000",
+
+"11011110111111101100111001100101",
+
+"00101100101000010100100000001101",
+
+"00111100000101010011001100101100",
+
+"00000001110011101100100110101101",
+
+"00010110000011001100110011010000",
+
+"00001011101011001101101010011000",
+
+"00110110000110111000111111100000",
+
+"11010010001100100000101110100110",
+
+"00000010100110110111000000000111",
+
+"01110101010001100101100001111100",
+
+"00000111111101010100111100111001",
+
+"11111000000010001101110111000011",
+
+"11011100110010100111011000001000",
+
+"01011110010000100111000110001000",
+
+"01000100101111001110110001011101",
+
+"00111011010111101100010010011011",
+],
+
+  a:'',
+  b:'',
+  c:'',
+  d:'',
+  e:'',
+  f:'',
+  g:'',
+  h:'',
+  Wlist:[],
+  index: 0,
+        allWlist: '',
+        nextW: '',
+        p:[],
+        Alist:[],
+        Blist:[],
+        resultX: '',
+        xCount: 0,
+        majXlist: [],
+        replacementChars: '01',
+    },
+    mounted() {
+ 
+    },
+    methods: {
+      convertToBinary() {
+        if (this.hexInput.length === 64 && /^[0-9A-Fa-f]+$/.test(this.hexInput)) {
+          const binaryValue = BigInt('0x' + this.hexInput).toString(2);
+          this.binaryResult = binaryValue.padStart(256, '0');
+        } else {
+          alert('Please enter a valid hexadecimal string of length 64.');
+          this.hexInput='';
+        }
+      },
+      displayBinaryLines() {
+        if (this.binaryResult) {
+          this.binaryLines = this.binaryResult.match(/.{1,32}/g) || [];
+        }
+      },
+      convertToDecimal() {
+        if (this.binaryLines.length > 0) {
+          this.decimalResult = this.binaryLines.map(line => parseInt(line, 2));
+          this.decimalLines = this.decimalResult.map(dec => dec.toString());
+        }
+      },
+      calculateMainDecimal() {
+        const ordinaryDecimal = [1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225];
+        if (this.decimalLines.length > 0) {
+          this.mainDecimalResult = this.decimalLines.map((dec, index) => parseInt(dec));
+          const te=4294967296;
+          this.mainDecimalLines = this.mainDecimalResult.map((mainDec, index) => Math.abs(te+mainDec - ordinaryDecimal[index]));
+        }
+      },
+      convertToRight32Binary() {
+        if (this.mainDecimalLines.length > 0) {
+          this.right32BinaryResult = this.mainDecimalLines.map(line => line.toString(2).slice(-32));
+          this.right32BinaryLines = this.right32BinaryResult.map(bin => bin.padStart(32, '0'));
+        }
+      },
+      setLinesForAtoH() {
+        if (this.right32BinaryLines.length >= 8) {
+          this.aToHBinaryResult = this.right32BinaryLines.slice(0, 8);
+          this.aToHBinaryLines = this.aToHBinaryResult.map(line => line.padStart(32, '0'));
+        }
+      },
+      
+      performStep7() {
+          this.convertToBinary();
+          this.displayBinaryLines();
+          this.convertToDecimal();
+          this.calculateMainDecimal();
+          this.convertToRight32Binary();         
+          this.setLinesForAtoH();
+          this.performStep8();
+          this.performStep9();
+         // this.performStep10();
+          
+},
+
+
+performStep8() {
+  if (this.aToHBinaryLines.length === 8) {
+    const A = parseInt(this.aToHBinaryLines[0], 2);
+    this.a=A.toString(2).padStart(32, '0');
+    const B = parseInt(this.aToHBinaryLines[1], 2);  
+    this.b=B.toString(2).padStart(32, '0');
+    //alert(this.b);
+     
+    const C = parseInt(this.aToHBinaryLines[2], 2);
+   this.c=C.toString(2).padStart(32, '0');
+    const D = parseInt(this.aToHBinaryLines[3], 2);
+    this.d=D.toString(2).padStart(32, '0');
+    const E = parseInt(this.aToHBinaryLines[4], 2);
+    this.e=E.toString(2).padStart(32, '0');
+    const F = parseInt(this.aToHBinaryLines[5], 2);
+    this.f=F.toString(2).padStart(32, '0');
+    //alert(this.f);
+    const G = parseInt(this.aToHBinaryLines[6], 2);
+    this.g=G.toString(2).padStart(32, '0');
+    const H = parseInt(this.aToHBinaryLines[7], 2);
+this.h=H.toString(2).padStart(32, '0');
+    // Rotations
+    const rotate2 = (B >>> 2) | (B << (32 - 2));
+    const rotate13 = (B >>> 13) | (B << (32 - 13));
+    const rotate22 = (B >>> 22) | (B << (32 - 22));
+    const sig0 = (rotate2 ^ rotate13 ^ rotate22) >>> 0;      
+    // Majority operation
+    const Majority = ((B & C) ^ (B & D) ^ (C & D)) >>> 0;            
+    const temp2 = (sig0 + Majority) % (2**32);
+   // this.temp2=temp2;
+    // Compute temp1
+    const temp1 = (4294967296 + A - temp2) % (2**32); 
+   // this.temp1=temp1;   
+    const DD = (4294967296 + E - temp1) % (2**32);   
+
+    // Rotations for sig1
+    const rotate6 = (F >>> 6) | (F << (32 - 6));
+    const rotate11 = (F >>> 11) | (F << (32 - 11));
+    const rotate25 = (F >>> 25) | (F << (32 - 25));
+    const sig1 = (rotate6 ^ rotate11 ^ rotate25) >>> 0;    
+
+    // Choice operation
+    const choice = ((F & G) ^ ((~F) & H)) >>> 0;   
+
+    // Iterate backwards through KBinaryLines
+    for (let i = this.KBinaryLines.length ; i >= 0; i--) {
+      const KValue = parseInt(this.KBinaryLines[i], 2);
+
+      // Compute HWW
+      const HWW = (choice + sig1 + KValue) >>> 0;
+
+      // Example value T1
+      const T1 = "100000000000000000000000000000000";    
+      const HW = (parseInt(T1, 2) + temp1 - HWW) >>> 0;
+
+      // Add the result to the updatedLines array for each iteration
+     //this.updatedLines.push(`Iteration ${i + 1}: HWW = ${HWW.toString(2).padStart(32, '0')}, HW = ${HW.toString(2).padStart(33, '0')}`);
+    }
+
+    // Push final results for display
+    this.updatedLines.push(
+      `sig0 = ${sig0.toString(2).padStart(32, '0')}`,
+      `Majority = ${Majority.toString(2).padStart(32, '0')}`,
+      `Temp2 = ${temp2.toString(2).padStart(32, '0')}`,
+      `Temp1 = ${temp1.toString(2).padStart(32, '0')}`,
+      `DD = ${DD.toString(2).padStart(32, '0')}`,
+      `Choice = ${choice.toString(2).padStart(32, '0')}`,
+      `sig1 = ${sig1.toString(2).padStart(32, '0')}`,
+    );
+    
+  }
+},
+
+
+  performStep9() {
+  const T1 = 4294967296;  // Use the maximum 32-bit value for T1
+
+  for (let i = 63; i >= 0; i--) {
+    // Parse binary values
+    j=63-i;
+    const KValue = parseInt(this.KBinaryLines[i], 2);
+    const HValue = parseInt(this.Hlist[j], 2);
+    const pv = parseInt(this.Elist[i], 2);
+    const woValue = parseInt(this.wo[i], 2);
+
+    // Perform rotations on B
+    const B = parseInt(this.b, 2);
+    const rotate2 = (B >>> 2) | (B << (32 - 2));
+    const rotate13 = (B >>> 13) | (B << (32 - 13));
+    const rotate22 = (B >>> 22) | (B << (32 - 22));
+    const sig0 = (rotate2 ^ rotate13 ^ rotate22) >>> 0;
+
+    // Majority operation
+    const C = parseInt(this.c, 2);
+    const D = parseInt(this.d, 2);
+    const Majority = ((B & C) ^ (B & D) ^ (C & D)) >>> 0;
+
+    // Calculate temp2
+    const temp2 = (sig0 + Majority) >>> 0;
+
+    // Calculate temp1
+    const A = parseInt(this.a, 2);
+    const temp1 = (A - temp2) >>> 0;
+
+    // Compute DD
+    const E = parseInt(this.e, 2);
+    const DD = (E - temp1) >>> 0;
+
+    // Calculate sig1 using rotations on F
+    const F = parseInt(this.f, 2);
+    const rotate6 = (F >>> 6) | (F << (32 - 6));
+    const rotate11 = (F >>> 11) | (F << (32 - 11));
+    const rotate25 = (F >>> 25) | (F << (32 - 25));
+    const sig1 = (rotate6 ^ rotate11 ^ rotate25) >>> 0;
+
+    // Choice operation and HWW calculation
+    const G = parseInt(this.g, 2);
+    const H = parseInt(this.h, 2);
+    const choice = ((F & G) ^ (~F & H)) >>> 0;
+    const HWW = (choice + sig1 + KValue + HValue) >>> 0;
+    const mt = (choice + sig1 + KValue + pv) >>> 0;
+    const woo = (choice + sig1 + KValue + woValue) >>> 0;
+
+    // Calculate W and pl
+    const W = (T1 + temp1 - HWW) >>> 0;
+    const Wlists=(T1 + temp1 -woo) >>> 0
+    //const pl = W;
+
+    // Push calculated W and pl to their respective lists as binary strings
+   //wordlist
+    this.Wlist.push(W.toString(2).padStart(32, '0'));
+   //temp1
+    this.p.push(temp1.toString(2).padStart(32, '0'));
+    //alist
+    this.Alist.push(A.toString(2).padStart(32, '0'));
+    //blist
+    this.Blist.push(B.toString(2).padStart(32, '0'));
+    // Update registers for the next round
+    this.a = this.b;
+    this.b = this.c;
+    this.c = this.d;
+    this.d = DD.toString(2).padStart(32, '0');  // Keep as binary string
+    this.e = this.f;
+    this.f = this.g;
+    this.g = this.h;
+ //yeh w se h find
+    this.h = Wlists.toString(2).padStart(32,0);  
+    //this.h = Wlists.toString(2).padStart(32,0);
+  }
+  const op = 11;
+if( this.p[op]===this.woo[op]){
+  alert("Completed");
+  
+  }
+  else{
+      alert("check please")
+  }
+ 
+},
+performStep10() {
+ 
+          const a57 = this.Alist[6];
+          const b57 = this.Blist[6];
+          
+          if (!a57 || !b57) {
+            this.resultX = 'Error: Missing binary data for comparison.';
+            this.xCount = 0;
+            return;
+          }
+
+          if (a57.length !== b57.length) {
+            this.resultX = 'Error: Binary strings must be of equal length.';
+            this.xCount = 0;
+            return;
+          }
+
+          this.resultX = a57.split('').map((bit, index) => {
+            return bit === b57[index] ? bit : 'x';
+          }).join('');
+
+          this.xCount = this.resultX.split('').filter(char => char === 'x').length;
+          
+        },
+        performStep11() {
+          const binaryLength = Math.pow(2, this.xCount); // 2^xCount
+          let binaryString = this.resultX;
+
+          // Ensure replacement chars are valid
+          const validChars = this.replacementChars.split('').filter((char, index, self) => self.indexOf(char) === index);
+          
+          // Replace all 'x' with the selected characters
+          const combinations = this.getCombinations(binaryString, validChars);
+          
+          // Update the majXlist with the generated combinations
+          this.majXlist = combinations;
+        },
+        getCombinations(str, chars) {
+          const results = [];
+          const xIndexes = [...str.matchAll(/x/g)].map(match => match.index);
+          
+          const generate = (combo, index) => {
+            if (index === xIndexes.length) {
+              results.push(combo);
+              return;
+            }
+            const currentIndex = xIndexes[index];
+            chars.forEach(char => {
+              generate(combo.slice(0, currentIndex) + char + combo.slice(currentIndex + 1), index + 1);
+            });
+          };
+          
+          generate(str, 0);
+          return results;
+        }
+
+}
+      
+    
+    
+  });
+</script>
+
+</body>
+</html>
+
+
+
